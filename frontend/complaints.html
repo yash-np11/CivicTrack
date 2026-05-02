@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CivicTrack Pro</title>
+
+    <style>
+    
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:linear-gradient(135deg,#0f172a,#1e293b);
+color:white;
+min-height:100vh;
+padding:20px;
+transition: all 0.4s ease;
+}
+
+header{
+background:rgba(255,255,255,0.08);
+backdrop-filter:blur(10px);
+padding:20px;
+border-radius:20px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+box-shadow:0 8px 30px rgba(0,0,0,0.3);
+}
+
+header h1{
+font-size:28px;
+font-weight:600;
+}
+
+.top-bar{
+display:flex;
+gap:15px;
+align-items:center;
+}
+
+button{
+background:linear-gradient(135deg,#2563eb,#7c3aed);
+border:none;
+padding:10px 18px;
+color:white;
+border-radius:12px;
+cursor:pointer;
+font-weight:500;
+transition:0.3s;
+}
+
+button:hover{
+transform:translateY(-2px);
+box-shadow:0 10px 20px rgba(0,0,0,0.3);
+}
+
+.controls{
+display:flex;
+gap:15px;
+margin-bottom:25px;
+flex-wrap:wrap;
+}
+
+input,select{
+padding:12px;
+border:none;
+border-radius:12px;
+background:rgba(255,255,255,0.1);
+color:white;
+outline:none;
+backdrop-filter:blur(5px);
+}
+
+input::placeholder{
+color:#ddd;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:20px;
+margin-bottom:30px;
+}
+
+.stat-card{
+background:rgba(255,255,255,0.08);
+padding:25px;
+border-radius:20px;
+text-align:center;
+backdrop-filter:blur(10px);
+box-shadow:0 8px 20px rgba(0,0,0,0.3);
+transition:0.3s;
+}
+
+.stat-card:hover{
+transform:translateY(-5px);
+}
+
+.stat-card h2{
+font-size:35px;
+margin-bottom:10px;
+}
+
+#map{
+height:350px;
+border-radius:20px;
+overflow:hidden;
+margin-bottom:30px;
+box-shadow:0 8px 25px rgba(0,0,0,0.4);
+}
+
+.complaint-card{
+background:rgba(255,255,255,0.08);
+padding:20px;
+border-radius:18px;
+margin-bottom:20px;
+backdrop-filter:blur(10px);
+box-shadow:0 8px 20px rgba(0,0,0,0.2);
+transition:0.3s;
+}
+
+.complaint-card:hover{
+transform:translateY(-3px);
+}
+
+.complaint-card h3{
+margin-bottom:10px;
+}
+
+.status{
+display:inline-block;
+padding:6px 14px;
+border-radius:30px;
+font-size:13px;
+margin-top:10px;
+}
+
+.pending{
+background:#f59e0b;
+}
+
+.resolved{
+background:#10b981;
+}
+
+.dark-mode{
+background:linear-gradient(135deg,#020617,#111827);
+}
+
+.light-mode{
+background:#f1f5f9;
+color:black;
+}
+
+.light-mode .complaint-card,
+.light-mode .stat-card,
+.light-mode header{
+background:white;
+color:black;
+}
+
+.light-mode input,
+.light-mode select{
+background:#e2e8f0;
+color:black;
+}
+
+@media(max-width:768px){
+
+header{
+flex-direction:column;
+gap:15px;
+}
+
+.controls{
+flex-direction:column;
+}
+
+}
+
+.complaint-image{
+width:100%;
+height:220px;
+object-fit:cover;
+border-radius:15px;
+margin-bottom:15px;
+}
+</style>
+    
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+
+   <header>
+<h1>🚀 CivicTrack Pro</h1>
+
+
+</header>
+
+<div class="stats">
+
+<div class="stat-card">
+<h2 id="totalCount">0</h2>
+<p>Total Complaints</p>
+</div>
+
+<div class="stat-card">
+<h2 id="pendingCount">0</h2>
+<p>Pending</p>
+</div>
+
+<div class="stat-card">
+<h2 id="resolvedCount">0</h2>
+<p>Resolved</p>
+</div>
+
+</div>
+
+
+
+<div class="top-bar">
+    <button onclick="toggleDarkMode()">
+🌙 Toggle Theme
+</button>
+</div>
+
+<div class="controls">
+    <input type="text" placeholder="Search..." onkeyup="searchComplaints(this.value)">
+    
+    <select onchange="filterStatus(this.value)">
+        <option value="">All</option>
+        <option value="Pending">Pending</option>
+        <option value="Resolved">Resolved</option>
+    </select>
+</div>
+
+
+<!-- 🔥 STATS -->
+<div class="stats">
+    <div class="stat-card">
+        <h3 id="total">0</h3>
+        Total
+    </div>
+    <div class="stat-card">
+        <h3 id="pending">0</h3>
+        Pending
+    </div>
+    <div class="stat-card">
+        <h3 id="resolved">0</h3>
+        Resolved
+    </div>
+</div>
+
+<div class="container" id="list"></div>
+
+<div id="map" style="height: 300px; margin: 20px;"></div>
+
+<script>
+    let map = L.map('map').setView([20.5937, 78.9629], 5); // India center
+
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+}).addTo(map);
+
+async function getCoordinates(place) {
+    const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${place}`);
+    const data = await res.json();
+
+    if (data.length > 0) {
+        return [data[0].lat, data[0].lon];
+    } else {
+        return null;
+    }
+}
+
+let allData = [];
+
+
+
+function updateStats(data){
+
+document.getElementById("totalCount").innerText = data.length;
+
+const pending = data.filter(c => c.status === "Pending").length;
+
+const resolved = data.filter(c => c.status === "Resolved").length;
+
+document.getElementById("pendingCount").innerText = pending;
+
+document.getElementById("resolvedCount").innerText = resolved;
+
+}
+
+async function loadComplaints(status = "") {
+    
+    const token = localStorage.getItem("token");
+
+if (!token) {
+  alert("Please login first");
+  window.location.href = "login.html";
+  return;
+}
+
+const res = await fetch("http://localhost:5000/complaints", {
+  headers: {
+    "Authorization": "Bearer " + token
+  },
+});
+    let data = await res.json();
+
+    allData = data;
+
+    updateStats(data);
+
+    if (status) {
+        data = data.filter(c => c.status === status);
+    }
+
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    for (let c of data) {
+    const card = document.createElement("div");
+    card.className = "complaint-card";
+
+card.innerHTML = `
+
+<h3>${c.title}</h3>
+
+<p>${c.description}</p>
+
+<p>📍 ${c.location}</p>
+
+<p>👨 Leader: ${c.leaderName}</p>
+
+<p>🏢 Area: ${c.leaderArea}</p>
+
+<p>⏳ Deadline: ${c.deadline}</p>
+
+<p>Status: ${c.status}</p>
+
+${c.image ? `
+<img 
+src="http://localhost:5000/uploads/${c.image}" 
+width="100%"
+style="border-radius:12px;margin-top:10px;"
+>
+` : ""}
+
+<button onclick="markResolved('${c._id}')">
+Resolve
+</button>
+
+<button onclick="deleteComplaint('${c._id}')">
+Delete
+</button>
+
+`;
+
+list.appendChild(card);
+
+    // 🔥 LOCATION → COORDINATES
+    const coords = await getCoordinates(c.location);
+
+    if (coords) {
+        L.marker(coords)
+            .addTo(map)
+            .bindPopup(c.title + " - " + c.location);
+    }
+}
+}
+
+function updateStats(data) {
+    document.getElementById("total").innerText = data.length;
+    document.getElementById("pending").innerText = data.filter(c => c.status === "Pending").length;
+    document.getElementById("resolved").innerText = data.filter(c => c.status === "Resolved").length;
+}
+
+function filterStatus(status) {
+    loadComplaints(status);
+}
+
+function searchComplaints(text) {
+    const filtered = allData.filter(c =>
+        c.title.toLowerCase().includes(text.toLowerCase()) ||
+        c.location.toLowerCase().includes(text.toLowerCase())
+    );
+
+    loadFiltered(filtered);
+}
+
+function loadFiltered(data) {
+    const list = document.getElementById("list");
+    list.innerHTML = "";
+
+    data.forEach(c => {
+        const card = document.createElement("div");
+        card.className = "card";
+
+        card.innerHTML = `<h3>${c.title}</h3>`;
+        list.appendChild(card);
+    });
+}
+
+function toggleDarkMode() {
+
+document.body.classList.toggle("light-mode");
+
+}
+
+async function markResolved(id) {
+    await fetch(`http://localhost:5000/update-status/${id}`, { method: "PUT" });
+    loadComplaints();
+}
+
+async function deleteComplaint(id) {
+    await fetch(`http://localhost:5000/delete-complaint/${id}`, { method: "DELETE" });
+    loadComplaints();
+}
+
+loadComplaints();
+</script>
+
+</body>
+</html>

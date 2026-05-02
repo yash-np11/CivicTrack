@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CivicTrack Pro</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:'Segoe UI', sans-serif;
+        }
+
+        body{
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:
+            linear-gradient(
+            135deg,
+            #0f172a,
+            #1e293b,
+            #2563eb
+            );
+            overflow:hidden;
+        }
+
+        .background-circle{
+            position:absolute;
+            border-radius:50%;
+            filter:blur(100px);
+            opacity:0.4;
+        }
+
+        .circle1{
+            width:300px;
+            height:300px;
+            background:#3b82f6;
+            top:-80px;
+            left:-50px;
+        }
+
+        .circle2{
+            width:350px;
+            height:350px;
+            background:#9333ea;
+            bottom:-100px;
+            right:-50px;
+        }
+
+        .container{
+            position:relative;
+            width:420px;
+            padding:35px;
+            border-radius:25px;
+            background:rgba(255,255,255,0.1);
+            backdrop-filter:blur(18px);
+            border:1px solid rgba(255,255,255,0.2);
+            box-shadow:
+            0 8px 32px rgba(0,0,0,0.3);
+            color:white;
+            animation:fadeIn 1s ease;
+        }
+
+        @keyframes fadeIn{
+            from{
+                opacity:0;
+                transform:translateY(20px);
+            }
+            to{
+                opacity:1;
+                transform:translateY(0px);
+            }
+        }
+
+        .logo{
+            text-align:center;
+            font-size:40px;
+            margin-bottom:10px;
+        }
+
+        h1{
+            text-align:center;
+            margin-bottom:8px;
+            font-size:32px;
+        }
+
+        .subtitle{
+            text-align:center;
+            color:#cbd5e1;
+            margin-bottom:30px;
+            font-size:14px;
+        }
+
+        .input-box{
+            margin-bottom:18px;
+        }
+
+        .input-box label{
+            display:block;
+            margin-bottom:8px;
+            font-size:14px;
+        }
+
+        .input-box input,
+        .input-box textarea{
+            width:100%;
+            padding:14px;
+            border:none;
+            border-radius:12px;
+            outline:none;
+            background:rgba(255,255,255,0.15);
+            color:white;
+            font-size:15px;
+        }
+
+        .input-box textarea{
+            resize:none;
+            height:100px;
+        }
+
+        .input-box input::placeholder,
+        .input-box textarea::placeholder{
+            color:#d1d5db;
+        }
+
+        .file-upload{
+            background:rgba(255,255,255,0.12);
+            padding:12px;
+            border-radius:12px;
+        }
+
+        .submit-btn{
+            width:100%;
+            padding:15px;
+            border:none;
+            border-radius:14px;
+            background:linear-gradient(
+            90deg,
+            #3b82f6,
+            #9333ea
+            );
+            color:white;
+            font-size:17px;
+            cursor:pointer;
+            margin-top:10px;
+            transition:0.3s;
+            font-weight:bold;
+        }
+
+        .submit-btn:hover{
+            transform:scale(1.03);
+            box-shadow:0 0 20px rgba(255,255,255,0.3);
+        }
+
+        .footer{
+            text-align:center;
+            margin-top:18px;
+            color:#cbd5e1;
+            font-size:13px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="background-circle circle1"></div>
+<div class="background-circle circle2"></div>
+
+<div class="container">
+
+    <div class="logo">
+        🚧
+    </div>
+
+    <h1>CivicTrack Pro</h1>
+
+    <div class="subtitle">
+        Smart Complaint Registration System
+    </div>
+
+    <div class="input-box">
+        <label>Complaint Title</label>
+
+        <input
+        type="text"
+        id="title"
+        placeholder="Enter complaint title">
+    </div>
+
+    <div class="input-box">
+        <label>Description</label>
+
+        <textarea
+        id="description"
+        placeholder="Describe the issue..."></textarea>
+    </div>
+
+    <div class="input-box">
+        <label>Location</label>
+
+        <input
+        type="text"
+        id="location"
+        placeholder="Enter location">
+    </div>
+
+    <div class="input-box">
+        <label>Upload Image</label>
+
+        <div class="file-upload">
+            <input type="file" id="image">
+        </div>
+    </div>
+
+    <button
+    class="submit-btn"
+    onclick="submitComplaint()">
+
+    Submit Complaint 🚀
+
+    </button>
+
+    <div class="footer">
+        CivicTrack © 2026
+    </div>
+
+</div>
+
+<script>
+
+async function submitComplaint(){
+
+const formData = new FormData();
+
+formData.append(
+"title",
+document.getElementById("title").value
+);
+
+formData.append(
+"description",
+document.getElementById("description").value
+);
+
+formData.append(
+"location",
+document.getElementById("location").value
+);
+
+formData.append(
+"image",
+document.getElementById("image").files[0]
+);
+
+const res = await fetch(
+"http://localhost:5000/add-complaint",
+{
+method:"POST",
+body:formData
+}
+);
+
+const msg = await res.text();
+
+alert(msg);
+
+}
+
+</script>
+
+</body>
+</html>
